@@ -1,11 +1,13 @@
 # SpecBridge
 
-SpecBridge is an open-source iOS toolkit that connects Ray-Ban Meta smart glasses to RTMP streaming platforms. It serves as a bridge between the Meta Wearables Device Access Toolkit (DAT) and standard broadcasting protocols, allowing developers to build custom live-streaming experiences for smart glasses.
+SpecBridge is an open-source iOS toolkit that connects Ray-Ban Meta smart glasses to **Twitch**. It serves as a bridge between the Meta Wearables Device Access Toolkit (DAT) and standard broadcasting protocols, allowing developers to build custom live-streaming experiences.
+
+*Note: While the underlying architecture supports RTMP (allowing for potential YouTube/Kick support), this version is currently hardcoded for Twitch.*
 
 ## Features
-- **Live Video Bridge:** Routes raw video frames from Ray-Ban Meta glasses to an RTMP ingest server (Twitch, YouTube, Kick).
+- **Live Video Bridge:** Routes raw video frames from Ray-Ban Meta glasses directly to Twitch.
 - **Audio Handling:** Manages iOS audio sessions to prevent Bluetooth disconnects during streaming.
-- **Secure Auth:** Setup screen to input and store Stream Keys locally on the device.
+- **Secure Auth:** Setup screen to input and store your Twitch Stream Key locally on the device.
 - **Modern Swift:** Uses Swift Concurrency (async/await) and the Actor model for thread-safe streaming.
 
 ## Prerequisites
@@ -20,7 +22,7 @@ Before attempting to build this project, ensure you have the following:
 ### Software & Accounts
 - **Xcode 15+:** Required to compile the Swift code.
 - **Meta View App:** Installed on your iPhone and paired with your glasses.
-- **Twitch Account:** (Or other RTMP provider) to obtain your Stream Key.
+- **Twitch Account:** To obtain your Stream Key.
 
 ### Important: Enable Developer Mode
 You must enable Developer Mode on your glasses for them to communicate with third-party apps like SpecBridge.
@@ -85,13 +87,17 @@ Once the app is running on your phone, follow this specific sequence to start a 
 - Tap **Stop All** in the app to end the broadcast.
 - You will hear an audio prompt: "Experience Stopped".
 
-## Troubleshooting
+## Known Issues
 
-**"Connection Reset by Peer" / Stream disconnects immediately**
-This usually means the stream key is invalid or the connection timed out. Ensure you have copied the correct key from your dashboard and that your internet connection is stable.
+- **Aspect Ratio Crop:** Currently, the stream broadcasts a 1:1 (Square) crop of the video feed, rather than the full 9:16 vertical video captured by the glasses. I'm investigating a fix for the buffer scaling.
+- **Twitch Only:** This version does not yet support changing the RTMP URL to other services (Kick, YouTube).
 
-**Video is paused / Audio issues**
-If the glasses pause the stream, it is usually because the iPhone stole the audio focus. This app manages the audio session automatically, but background apps (like Spotify or Calls) may interrupt the stream.
+## Roadmap
+
+I'm actively working on the following improvements:
+- **Full 9:16 Support:** Fixing the video pipeline to broadcast the full vertical field of view.
+- **Multi-Platform Support:** Adding a settings menu to allow custom RTMP URLs (YouTube, Kick, etc).
+- **UI Polish:** Improving the setup flow and status indicators.
 
 ## Disclaimer
 

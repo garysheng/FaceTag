@@ -37,7 +37,7 @@ Use the physical capture button on your Ray-Ban Meta glasses. When you tap to ta
 
 ### 1. Build the App
 
-1. Open `SpecBridge.xcodeproj` in Xcode
+1. Open `FaceTag.xcodeproj` in Xcode
 2. Select your Apple ID under **Signing & Capabilities**
 3. Connect your iPhone and click **Run**
 
@@ -52,13 +52,13 @@ Use the physical capture button on your Ray-Ban Meta glasses. When you tap to ta
 
 ```
 FaceTag/
-├── SpecBridge/
-│   ├── SpecBridgeApp.swift     # App entry point
+├── FaceTag/
+│   ├── FaceTagApp.swift        # App entry point
 │   ├── ContentView.swift       # Main UI + capture sheet
-│   ├── StreamManager.swift     # Glasses photo capture listener
+│   ├── StreamManager.swift     # Glasses camera connection
 │   └── ContactManager.swift    # Create/update contacts
 │
-└── SpecBridge.xcodeproj
+└── FaceTag.xcodeproj
 ```
 
 ## Permissions

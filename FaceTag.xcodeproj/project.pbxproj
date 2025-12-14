@@ -15,26 +15,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		833554D32EE3A69500387D03 /* SpecBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpecBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		833554D32EE3A69500387D03 /* FaceTag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FaceTag.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		833554E92EE3A7FF00387D03 /* Exceptions for "SpecBridge" folder in "SpecBridge" target */ = {
+		833554E92EE3A7FF00387D03 /* Exceptions for "FaceTag" folder in "FaceTag" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 833554D22EE3A69500387D03 /* SpecBridge */;
+			target = 833554D22EE3A69500387D03 /* FaceTag */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		833554D52EE3A69500387D03 /* SpecBridge */ = {
+		833554D52EE3A69500387D03 /* FaceTag */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				833554E92EE3A7FF00387D03 /* Exceptions for "SpecBridge" folder in "SpecBridge" target */,
+				833554E92EE3A7FF00387D03 /* Exceptions for "FaceTag" folder in "FaceTag" target */,
 			);
-			path = SpecBridge;
+			path = FaceTag;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -58,7 +58,7 @@
 		833554CA2EE3A69500387D03 = {
 			isa = PBXGroup;
 			children = (
-				833554D52EE3A69500387D03 /* SpecBridge */,
+				833554D52EE3A69500387D03 /* FaceTag */,
 				833554D42EE3A69500387D03 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -66,7 +66,7 @@
 		833554D42EE3A69500387D03 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				833554D32EE3A69500387D03 /* SpecBridge.app */,
+				833554D32EE3A69500387D03 /* FaceTag.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,9 +74,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		833554D22EE3A69500387D03 /* SpecBridge */ = {
+		833554D22EE3A69500387D03 /* FaceTag */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 833554DE2EE3A69600387D03 /* Build configuration list for PBXNativeTarget "SpecBridge" */;
+			buildConfigurationList = 833554DE2EE3A69600387D03 /* Build configuration list for PBXNativeTarget "FaceTag" */;
 			buildPhases = (
 				833554CF2EE3A69500387D03 /* Sources */,
 				833554D02EE3A69500387D03 /* Frameworks */,
@@ -87,9 +87,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				833554D52EE3A69500387D03 /* SpecBridge */,
+				833554D52EE3A69500387D03 /* FaceTag */,
 			);
-			name = SpecBridge;
+			name = FaceTag;
 			packageProductDependencies = (
 				833554E22EE3A72200387D03 /* MWDATCamera */,
 				833554E42EE3A72200387D03 /* MWDATCore */,
@@ -98,7 +98,7 @@
 				833554EF2EE3B87000387D03 /* RTMPHaishinKit */,
 			);
 			productName = TwitchStreamer;
-			productReference = 833554D32EE3A69500387D03 /* SpecBridge.app */;
+			productReference = 833554D32EE3A69500387D03 /* FaceTag.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -116,7 +116,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 833554CE2EE3A69500387D03 /* Build configuration list for PBXProject "SpecBridge" */;
+			buildConfigurationList = 833554CE2EE3A69500387D03 /* Build configuration list for PBXProject "FaceTag" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -134,7 +134,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				833554D22EE3A69500387D03 /* SpecBridge */,
+				833554D22EE3A69500387D03 /* FaceTag */,
 			);
 		};
 /* End PBXProject section */
@@ -290,8 +290,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SpecBridge/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SpecBridge;
+				INFOPLIST_FILE = FaceTag/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FaceTag;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Need to connect to Ray-Ban Meta glasses";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Required for streaming video from Ray-Ban Meta glasses.";
@@ -311,7 +311,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.garysheng.SpecBridge;
+				PRODUCT_BUNDLE_IDENTIFIER = com.garysheng.FaceTag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -342,8 +342,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SpecBridge/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SpecBridge;
+				INFOPLIST_FILE = FaceTag/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FaceTag;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Need to connect to Ray-Ban Meta glasses";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Required for streaming video from Ray-Ban Meta glasses.";
@@ -363,7 +363,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.garysheng.SpecBridge;
+				PRODUCT_BUNDLE_IDENTIFIER = com.garysheng.FaceTag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -383,7 +383,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		833554CE2EE3A69500387D03 /* Build configuration list for PBXProject "SpecBridge" */ = {
+		833554CE2EE3A69500387D03 /* Build configuration list for PBXProject "FaceTag" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				833554DC2EE3A69600387D03 /* Debug */,
@@ -392,7 +392,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		833554DE2EE3A69600387D03 /* Build configuration list for PBXNativeTarget "SpecBridge" */ = {
+		833554DE2EE3A69600387D03 /* Build configuration list for PBXNativeTarget "FaceTag" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				833554DF2EE3A69600387D03 /* Debug */,

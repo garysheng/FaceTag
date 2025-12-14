@@ -1,15 +1,15 @@
 //
-//  SpecBridgeApp.swift
-//  SpecBridge
+//  FaceTagApp.swift
+//  FaceTag
 //
-//  Created by Jason Dukes on 12/5/25.
+//  Forked from SpecBridge by Jason Dukes
 //
 
 import SwiftUI
 import MWDATCore
 
 @main
-struct SpecBridgeApp: App {
+struct FaceTagApp: App {
     
     init() {
         try? Wearables.configure()

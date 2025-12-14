@@ -15,6 +15,8 @@ class CaptureManager: ObservableObject {
     private var streamSession: StreamSession?
     private var photoToken: AnyListenerToken?
     private var stateToken: AnyListenerToken?
+    private var frameToken: AnyListenerToken?
+    private var latestFrame: UIImage?
     
     private func configureAudio() {
         let session = AVAudioSession.sharedInstance()
@@ -51,15 +53,24 @@ class CaptureManager: ObservableObject {
         status = "Connecting to glasses..."
         let selector = AutoDeviceSelector(wearables: Wearables.shared)
         
-        // High resolution for good contact photos, low frame rate since we only want stills
+        // Medium resolution, moderate frame rate for reliable capture
         let config = StreamSessionConfig(
             videoCodec: .raw,
-            resolution: .high,
-            frameRate: 2
+            resolution: .medium,
+            frameRate: 15
         )
         
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)
         self.streamSession = session
+        
+        // Listen for video frames (keep latest for fallback capture)
+        frameToken = session.videoFramePublisher.listen { [weak self] frame in
+            if let image = frame.makeUIImage() {
+                Task { @MainActor in
+                    self?.latestFrame = image
+                }
+            }
+        }
         
         // Listen for photos captured via glasses button or capturePhoto()
         photoToken = session.photoDataPublisher.listen { [weak self] photoData in
@@ -104,18 +115,28 @@ class CaptureManager: ObservableObject {
         streamSession = nil
         photoToken = nil
         stateToken = nil
+        frameToken = nil
+        latestFrame = nil
         isConnected = false
         status = "Ready"
     }
     
-    /// Trigger a photo capture programmatically
+    /// Trigger a photo capture - uses latest video frame for reliability
     func capturePhoto() {
         guard isConnected else {
             status = "Not connected"
             return
         }
-        status = "Capturing..."
-        streamSession?.capturePhoto(format: .jpeg)
+        
+        // Use latest video frame directly (more reliable than photo API)
+        if let frame = latestFrame {
+            capturedPhoto = frame
+            status = "Photo captured!"
+        } else {
+            // Fallback to photo API
+            status = "Capturing..."
+            streamSession?.capturePhoto(format: .jpeg)
+        }
     }
     
     /// Clear the captured photo after saving

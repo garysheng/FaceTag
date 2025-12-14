@@ -7,7 +7,7 @@ struct ContentView: View {
     @StateObject private var contactManager = ContactManager()
     
     @State private var showCaptureSheet = false
-    @State private var registrationState: RegistrationState = .unregistered
+    @State private var isRegistered = false
     
     var body: some View {
         VStack(spacing: 32) {
@@ -29,7 +29,7 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
-                Text(statusMessage)
+                Text(captureManager.status)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -44,7 +44,7 @@ struct ContentView: View {
                     Image(systemName: "hand.tap.fill")
                         .font(.title)
                         .foregroundStyle(.blue)
-                    Text("Tap your glasses to capture")
+                    Text("Tap Capture Photo below")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -58,33 +58,25 @@ struct ContentView: View {
             // Controls
             VStack(spacing: 12) {
                 if !captureManager.isConnected {
-                    switch registrationState {
-                    case .unregistered:
-                        Button {
-                            try? Wearables.shared.startRegistration()
-                        } label: {
-                            Label("Connect to Meta View", systemImage: "link")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        
-                    case .registered:
-                        Button {
-                            Task {
-                                await captureManager.startListening()
-                            }
-                        } label: {
-                            Label("Start Camera", systemImage: "play.fill")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        
-                    case .registering:
-                        ProgressView()
-                            .padding()
+                    Button {
+                        try? Wearables.shared.startRegistration()
+                    } label: {
+                        Label("Connect to Meta View", systemImage: "link")
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    
+                    Button {
+                        Task {
+                            await captureManager.startListening()
+                        }
+                    } label: {
+                        Label("Start Camera", systemImage: "play.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                 } else {
                     // Manual capture button
                     Button {
@@ -111,15 +103,10 @@ struct ContentView: View {
             .padding(.horizontal)
             .padding(.bottom, 32)
         }
-        .task {
-            // Listen for registration state changes
-            for await state in Wearables.shared.registrationStateStream() {
-                registrationState = state
-            }
-        }
         .onOpenURL { url in
             Task {
                 try? await Wearables.shared.handleUrl(url)
+                isRegistered = true
             }
         }
         .onChange(of: captureManager.capturedPhoto) { _, newPhoto in
@@ -143,23 +130,6 @@ struct ContentView: View {
             Task {
                 _ = await contactManager.requestAccess()
             }
-        }
-    }
-    
-    var statusMessage: String {
-        if captureManager.isConnected {
-            return captureManager.status
-        }
-        
-        switch registrationState {
-        case .unregistered:
-            return "Connect your glasses to get started"
-        case .registering:
-            return "Connecting..."
-        case .registered:
-            return "Glasses connected. Tap Start Camera."
-        @unknown default:
-            return captureManager.status
         }
     }
 }

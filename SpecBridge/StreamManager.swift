@@ -27,34 +27,41 @@ class CaptureManager: ObservableObject {
     }
     
     func startListening() async {
-        status = "Checking permissions..."
+        status = "Starting..."
         
-        let currentStatus = try? await Wearables.shared.checkPermissionStatus(.camera)
-        if currentStatus != .granted {
-            status = "Requesting permission..."
-            let requestResult = try? await Wearables.shared.requestPermission(.camera)
-            if requestResult != .granted {
-                status = "Permission denied. Check Meta AI app."
-                return
+        // Check camera permission
+        do {
+            let permStatus = try await Wearables.shared.checkPermissionStatus(.camera)
+            
+            if permStatus != .granted {
+                status = "Requesting camera access..."
+                let result = try await Wearables.shared.requestPermission(.camera)
+                if result != .granted {
+                    status = "Camera permission denied"
+                    return
+                }
             }
+        } catch {
+            status = "Permission error: \(error.localizedDescription)"
+            return
         }
         
         configureAudio()
         
-        status = "Connecting..."
+        status = "Connecting to glasses..."
         let selector = AutoDeviceSelector(wearables: Wearables.shared)
         
-        // We still need a stream session to receive photos
+        // High resolution for good contact photos, low frame rate since we only want stills
         let config = StreamSessionConfig(
             videoCodec: .raw,
-            resolution: .high,  // High res for better contact photos
-            frameRate: 2        // Minimal frame rate since we only want photos
+            resolution: .high,
+            frameRate: 2
         )
         
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)
         self.streamSession = session
         
-        // Listen for photos captured via glasses button
+        // Listen for photos captured via glasses button or capturePhoto()
         photoToken = session.photoDataPublisher.listen { [weak self] photoData in
             let data = photoData.data
             if let image = UIImage(data: data) {
@@ -71,7 +78,7 @@ class CaptureManager: ObservableObject {
                 switch state {
                 case .streaming:
                     self?.isConnected = true
-                    self?.status = "Ready - tap glasses to capture"
+                    self?.status = "Ready - tap to capture"
                 case .stopped:
                     self?.isConnected = false
                     self?.status = "Disconnected"
@@ -94,18 +101,28 @@ class CaptureManager: ObservableObject {
     
     func stopListening() async {
         await streamSession?.stop()
+        streamSession = nil
+        photoToken = nil
+        stateToken = nil
         isConnected = false
         status = "Ready"
     }
     
-    /// Trigger a photo capture programmatically (backup option)
+    /// Trigger a photo capture programmatically
     func capturePhoto() {
+        guard isConnected else {
+            status = "Not connected"
+            return
+        }
+        status = "Capturing..."
         streamSession?.capturePhoto(format: .jpeg)
     }
     
     /// Clear the captured photo after saving
     func clearPhoto() {
         capturedPhoto = nil
-        status = "Ready - tap glasses to capture"
+        if isConnected {
+            status = "Ready - tap to capture"
+        }
     }
 }

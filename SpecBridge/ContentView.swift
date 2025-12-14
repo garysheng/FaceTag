@@ -3,73 +3,61 @@ import MWDATCore
 import Contacts
 
 struct ContentView: View {
-    @StateObject private var streamManager = StreamManager()
+    @StateObject private var captureManager = CaptureManager()
     @StateObject private var contactManager = ContactManager()
     
-    @State private var capturedPhoto: UIImage?
     @State private var showCaptureSheet = false
     @State private var isRegistered = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("FaceTag")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Text(streamManager.status)
-                        .font(.caption)
+        VStack(spacing: 32) {
+            Spacer()
+            
+            // Icon and status
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(captureManager.isConnected ? Color.green.opacity(0.15) : Color.gray.opacity(0.1))
+                        .frame(width: 160, height: 160)
+                    
+                    Image(systemName: "eyeglasses")
+                        .font(.system(size: 64))
+                        .foregroundStyle(captureManager.isConnected ? .green : .gray)
+                }
+                
+                Text("FaceTag")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Text(captureManager.status)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+            
+            Spacer()
+            
+            // Instructions when connected
+            if captureManager.isConnected {
+                VStack(spacing: 8) {
+                    Image(systemName: "hand.tap.fill")
+                        .font(.title)
+                        .foregroundStyle(.blue)
+                    Text("Tap your glasses to capture a face")
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
-                Spacer()
+                .padding()
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(12)
             }
-            .padding()
             
-            // Video Feed
-            ZStack {
-                Color.black
-                
-                if let frame = streamManager.currentFrame {
-                    Image(uiImage: frame)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } else {
-                    VStack(spacing: 16) {
-                        Image(systemName: "eyeglasses")
-                            .font(.system(size: 60))
-                            .foregroundStyle(.gray.opacity(0.5))
-                        Text("Connect your glasses to begin")
-                            .font(.subheadline)
-                            .foregroundStyle(.gray)
-                    }
-                }
-                
-                // Capture button overlay
-                if streamManager.isStreaming {
-                    VStack {
-                        Spacer()
-                        Button {
-                            capturePhoto()
-                        } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: 72, height: 72)
-                                Circle()
-                                    .stroke(.white, lineWidth: 4)
-                                    .frame(width: 82, height: 82)
-                            }
-                        }
-                        .padding(.bottom, 32)
-                    }
-                }
-            }
-            .frame(maxHeight: .infinity)
+            Spacer()
             
-            // Bottom controls
-            VStack(spacing: 16) {
-                if !streamManager.isStreaming {
+            // Controls
+            VStack(spacing: 12) {
+                if !captureManager.isConnected {
                     if !isRegistered {
                         Button {
                             try? Wearables.shared.startRegistration()
@@ -83,29 +71,39 @@ struct ContentView: View {
                     
                     Button {
                         Task {
-                            await streamManager.startStreaming()
+                            await captureManager.startListening()
                         }
                     } label: {
-                        Label("Start Camera", systemImage: "video.fill")
+                        Label("Start", systemImage: "play.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                 } else {
+                    // Manual capture button as backup
+                    Button {
+                        captureManager.capturePhoto()
+                    } label: {
+                        Label("Capture Now", systemImage: "camera.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    
                     Button {
                         Task {
-                            await streamManager.stopStreaming()
+                            await captureManager.stopListening()
                         }
                     } label: {
-                        Label("Stop Camera", systemImage: "stop.fill")
+                        Label("Disconnect", systemImage: "stop.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
-                    .tint(.red)
                     .controlSize(.large)
                 }
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.bottom, 32)
         }
         .onOpenURL { url in
             Task {
@@ -113,14 +111,19 @@ struct ContentView: View {
                 isRegistered = true
             }
         }
+        .onChange(of: captureManager.capturedPhoto) { _, newPhoto in
+            if newPhoto != nil {
+                showCaptureSheet = true
+            }
+        }
         .sheet(isPresented: $showCaptureSheet) {
-            if let photo = capturedPhoto {
+            if let photo = captureManager.capturedPhoto {
                 CaptureSheet(
                     photo: photo,
                     contactManager: contactManager,
                     onDismiss: {
                         showCaptureSheet = false
-                        capturedPhoto = nil
+                        captureManager.clearPhoto()
                     }
                 )
             }
@@ -129,13 +132,6 @@ struct ContentView: View {
             Task {
                 _ = await contactManager.requestAccess()
             }
-        }
-    }
-    
-    private func capturePhoto() {
-        if let photo = streamManager.capturePhoto() {
-            capturedPhoto = photo
-            showCaptureSheet = true
         }
     }
 }
@@ -295,7 +291,6 @@ struct ContactPickerView: View {
                     addPhotoToContact(contact)
                 } label: {
                     HStack(spacing: 12) {
-                        // Contact avatar
                         if let imageData = contact.thumbnailImageData,
                            let image = UIImage(data: imageData) {
                             Image(uiImage: image)
@@ -309,10 +304,8 @@ struct ContactPickerView: View {
                                 .foregroundStyle(.gray)
                         }
                         
-                        VStack(alignment: .leading) {
-                            Text("\(contact.givenName) \(contact.familyName)")
-                                .foregroundStyle(.primary)
-                        }
+                        Text("\(contact.givenName) \(contact.familyName)")
+                            .foregroundStyle(.primary)
                         
                         Spacer()
                     }

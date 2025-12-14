@@ -7,15 +7,15 @@ Capture faces through your Ray-Ban Meta glasses and save them as contacts.
 ## How It Works
 
 ```
-See someone → Tap capture → Enter their name → Saved as contact with photo
+See someone → Tap glasses → Photo appears in app → Enter name → Saved as contact
 ```
 
-Use your Ray-Ban Meta glasses as a first-person camera. When you meet someone, tap the capture button to take their photo and save them as a new contact (or add to an existing one).
+Use the physical capture button on your Ray-Ban Meta glasses. When you tap to take a photo, it automatically appears in the app ready to save as a contact.
 
 ## Features
 
-- **Live viewfinder** from your glasses camera
-- **One-tap capture** to take a photo
+- **Tap to capture** using the glasses touchpad
+- **No video streaming** — just capture and save
 - **Create new contact** with name and photo
 - **Add to existing contact** to update someone's profile picture
 
@@ -44,9 +44,9 @@ Use your Ray-Ban Meta glasses as a first-person camera. When you meet someone, t
 ### 2. Use the App
 
 1. Tap **Connect Glasses** → approve in Meta View app
-2. Tap **Start Camera** to see through your glasses
-3. When you see someone, tap the **capture button**
-4. Enter their name and tap **Create New Contact** or **Add to Existing**
+2. Tap **Start** to begin listening for captures
+3. **Tap your glasses touchpad** when you see someone
+4. Photo appears → enter name → save as contact
 
 ## Project Structure
 
@@ -54,8 +54,8 @@ Use your Ray-Ban Meta glasses as a first-person camera. When you meet someone, t
 FaceTag/
 ├── SpecBridge/
 │   ├── SpecBridgeApp.swift     # App entry point
-│   ├── ContentView.swift       # Main UI + capture flow
-│   ├── StreamManager.swift     # Glasses camera connection
+│   ├── ContentView.swift       # Main UI + capture sheet
+│   ├── StreamManager.swift     # Glasses photo capture listener
 │   └── ContactManager.swift    # Create/update contacts
 │
 └── SpecBridge.xcodeproj
@@ -63,9 +63,8 @@ FaceTag/
 
 ## Permissions
 
-The app requires:
-- **Contacts** - to save captured faces as contacts
-- **Bluetooth** - to connect to your glasses
+- **Contacts** — to save captured faces as contacts
+- **Bluetooth** — to connect to your glasses
 
 ## Credits
 

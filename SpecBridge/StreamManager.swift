@@ -7,27 +7,26 @@ import MWDATCore
 import MWDATCamera
 
 @MainActor
-class StreamManager: ObservableObject {
-    @Published var currentFrame: UIImage?
+class CaptureManager: ObservableObject {
     @Published var status = "Ready"
-    @Published var isStreaming = false
+    @Published var isConnected = false
+    @Published var capturedPhoto: UIImage?
     
     private var streamSession: StreamSession?
-    private var token: AnyListenerToken?
+    private var photoToken: AnyListenerToken?
+    private var stateToken: AnyListenerToken?
     
     private func configureAudio() {
         let session = AVAudioSession.sharedInstance()
         do {
-            // Sets iOS to allow Bluetooth audio (prevents "Video Paused" error)
             try session.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker])
             try session.setActive(true)
-            print("Audio session configured successfully")
         } catch {
-            print("Failed to configure audio session: \(error)")
+            print("Audio config error: \(error)")
         }
     }
     
-    func startStreaming() async {
+    func startListening() async {
         status = "Checking permissions..."
         
         let currentStatus = try? await Wearables.shared.checkPermissionStatus(.camera)
@@ -40,45 +39,73 @@ class StreamManager: ObservableObject {
             }
         }
         
-        status = "Configuring..."
         configureAudio()
         
+        status = "Connecting..."
         let selector = AutoDeviceSelector(wearables: Wearables.shared)
         
-        // Medium resolution for better photo quality
+        // We still need a stream session to receive photos
         let config = StreamSessionConfig(
             videoCodec: .raw,
-            resolution: .medium,
-            frameRate: 24
+            resolution: .high,  // High res for better contact photos
+            frameRate: 2        // Minimal frame rate since we only want photos
         )
         
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)
         self.streamSession = session
         
-        token = session.videoFramePublisher.listen { [weak self] frame in
-            if let image = frame.makeUIImage() {
+        // Listen for photos captured via glasses button
+        photoToken = session.photoDataPublisher.listen { [weak self] photoData in
+            let data = photoData.data
+            if let image = UIImage(data: data) {
                 Task { @MainActor in
-                    self?.currentFrame = image
-                    self?.status = "Connected"
-                    self?.isStreaming = true
+                    self?.capturedPhoto = image
+                    self?.status = "Photo captured!"
                 }
             }
         }
         
-        status = "Connecting..."
+        // Listen for state changes
+        stateToken = session.statePublisher.listen { [weak self] state in
+            Task { @MainActor in
+                switch state {
+                case .streaming:
+                    self?.isConnected = true
+                    self?.status = "Ready - tap glasses to capture"
+                case .stopped:
+                    self?.isConnected = false
+                    self?.status = "Disconnected"
+                case .paused:
+                    self?.status = "Paused"
+                case .starting:
+                    self?.status = "Starting..."
+                case .stopping:
+                    self?.status = "Stopping..."
+                case .waitingForDevice:
+                    self?.status = "Waiting for glasses..."
+                @unknown default:
+                    break
+                }
+            }
+        }
+        
         await session.start()
     }
     
-    func stopStreaming() async {
-        status = "Stopping..."
+    func stopListening() async {
         await streamSession?.stop()
+        isConnected = false
         status = "Ready"
-        isStreaming = false
-        currentFrame = nil
     }
     
-    /// Capture the current frame as a photo
-    func capturePhoto() -> UIImage? {
-        return currentFrame
+    /// Trigger a photo capture programmatically (backup option)
+    func capturePhoto() {
+        streamSession?.capturePhoto(format: .jpeg)
+    }
+    
+    /// Clear the captured photo after saving
+    func clearPhoto() {
+        capturedPhoto = nil
+        status = "Ready - tap glasses to capture"
     }
 }

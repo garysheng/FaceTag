@@ -69,7 +69,23 @@ class ContactManager: ObservableObject {
             }
         }
         
-        guard let mutableContact = contact.mutableCopy() as? CNMutableContact else {
+        // Re-fetch the contact with the keys needed for updating
+        let keysToFetch: [CNKeyDescriptor] = [
+            CNContactGivenNameKey as CNKeyDescriptor,
+            CNContactFamilyNameKey as CNKeyDescriptor,
+            CNContactImageDataKey as CNKeyDescriptor,
+            CNContactIdentifierKey as CNKeyDescriptor
+        ]
+        
+        let fullContact: CNContact
+        do {
+            fullContact = try store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keysToFetch)
+        } catch {
+            print("Failed to fetch contact: \(error)")
+            throw ContactError.updateFailed
+        }
+        
+        guard let mutableContact = fullContact.mutableCopy() as? CNMutableContact else {
             throw ContactError.updateFailed
         }
         
@@ -80,26 +96,6 @@ class ContactManager: ObservableObject {
         let saveRequest = CNSaveRequest()
         saveRequest.update(mutableContact)
         try store.execute(saveRequest)
-    }
-    
-    /// Search contacts by name
-    func searchContacts(query: String) -> [CNContact] {
-        guard authorizationStatus == .authorized else { return [] }
-        
-        let keysToFetch: [CNKeyDescriptor] = [
-            CNContactGivenNameKey as CNKeyDescriptor,
-            CNContactFamilyNameKey as CNKeyDescriptor,
-            CNContactThumbnailImageDataKey as CNKeyDescriptor,
-            CNContactIdentifierKey as CNKeyDescriptor
-        ]
-        
-        do {
-            let predicate = CNContact.predicateForContacts(matchingName: query)
-            return try store.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
-        } catch {
-            print("Search error: \(error)")
-            return []
-        }
     }
     
     /// Fetch all contacts (for picker)
@@ -142,4 +138,3 @@ enum ContactError: LocalizedError {
         }
     }
 }
-

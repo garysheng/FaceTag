@@ -51,14 +51,12 @@ class CaptureManager: ObservableObject {
         status = "Connecting to glasses..."
         let selector = AutoDeviceSelector(wearables: Wearables.shared)
         
-        // Medium resolution balances quality and speed
-        // .high = 720x1280 (slow over Bluetooth)
-        // .medium = 504x896 (faster)
-        // .low = 360x640 (fastest)
+        // High resolution for good contact photos
+        // Higher frame rate = faster captures (less wait for next frame)
         let config = StreamSessionConfig(
             videoCodec: .raw,
-            resolution: .medium,
-            frameRate: 2
+            resolution: .high,
+            frameRate: 15
         )
         
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)
@@ -117,18 +115,8 @@ class CaptureManager: ObservableObject {
             status = "Not connected"
             return
         }
-        status = "Capturing (takes a few seconds)..."
+        status = "Capturing..."
         streamSession?.capturePhoto(format: .jpeg)
-        
-        // Timeout fallback - reset status if no photo received
-        Task {
-            try? await Task.sleep(for: .seconds(10))
-            await MainActor.run {
-                if self.status.contains("Capturing") {
-                    self.status = "Capture timed out. Try again."
-                }
-            }
-        }
     }
     
     /// Clear the captured photo after saving

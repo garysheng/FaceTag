@@ -69,23 +69,21 @@ class ContactManager: ObservableObject {
             }
         }
         
-        // Re-fetch the contact with the keys needed for updating
+        // Re-fetch the contact with all keys needed for updating
         let keysToFetch: [CNKeyDescriptor] = [
             CNContactGivenNameKey as CNKeyDescriptor,
             CNContactFamilyNameKey as CNKeyDescriptor,
-            CNContactImageDataKey as CNKeyDescriptor,
-            CNContactIdentifierKey as CNKeyDescriptor
+            CNContactImageDataKey as CNKeyDescriptor
         ]
         
-        let fullContact: CNContact
+        let refetchedContact: CNContact
         do {
-            fullContact = try store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keysToFetch)
+            refetchedContact = try store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keysToFetch)
         } catch {
-            print("Failed to fetch contact: \(error)")
-            throw ContactError.updateFailed
+            throw ContactError.fetchFailed
         }
         
-        guard let mutableContact = fullContact.mutableCopy() as? CNMutableContact else {
+        guard let mutableContact = refetchedContact.mutableCopy() as? CNMutableContact else {
             throw ContactError.updateFailed
         }
         
@@ -96,6 +94,26 @@ class ContactManager: ObservableObject {
         let saveRequest = CNSaveRequest()
         saveRequest.update(mutableContact)
         try store.execute(saveRequest)
+    }
+    
+    /// Search contacts by name
+    func searchContacts(query: String) -> [CNContact] {
+        guard authorizationStatus == .authorized else { return [] }
+        
+        let keysToFetch: [CNKeyDescriptor] = [
+            CNContactGivenNameKey as CNKeyDescriptor,
+            CNContactFamilyNameKey as CNKeyDescriptor,
+            CNContactThumbnailImageDataKey as CNKeyDescriptor,
+            CNContactIdentifierKey as CNKeyDescriptor
+        ]
+        
+        do {
+            let predicate = CNContact.predicateForContacts(matchingName: query)
+            return try store.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
+        } catch {
+            print("Search error: \(error)")
+            return []
+        }
     }
     
     /// Fetch all contacts (for picker)
@@ -128,6 +146,7 @@ class ContactManager: ObservableObject {
 enum ContactError: LocalizedError {
     case notAuthorized
     case updateFailed
+    case fetchFailed
     
     var errorDescription: String? {
         switch self {
@@ -135,6 +154,9 @@ enum ContactError: LocalizedError {
             return "Contact access not authorized"
         case .updateFailed:
             return "Failed to update contact"
+        case .fetchFailed:
+            return "Failed to fetch contact"
         }
     }
 }
+

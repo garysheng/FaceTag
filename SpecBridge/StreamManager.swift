@@ -51,12 +51,11 @@ class CaptureManager: ObservableObject {
         status = "Connecting to glasses..."
         let selector = AutoDeviceSelector(wearables: Wearables.shared)
         
-        // High resolution for good contact photos
-        // Higher frame rate = faster captures (less wait for next frame)
+        // High resolution for good contact photos, low frame rate since we only want stills
         let config = StreamSessionConfig(
             videoCodec: .raw,
             resolution: .high,
-            frameRate: 15
+            frameRate: 2
         )
         
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)

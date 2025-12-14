@@ -11,12 +11,12 @@ class CaptureManager: ObservableObject {
     @Published var status = "Ready"
     @Published var isConnected = false
     @Published var capturedPhoto: UIImage?
+    @Published var currentFrame: UIImage?  // Live preview
     
     private var streamSession: StreamSession?
     private var photoToken: AnyListenerToken?
     private var stateToken: AnyListenerToken?
     private var frameToken: AnyListenerToken?
-    private var latestFrame: UIImage?
     
     private func configureAudio() {
         let session = AVAudioSession.sharedInstance()
@@ -63,11 +63,11 @@ class CaptureManager: ObservableObject {
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)
         self.streamSession = session
         
-        // Listen for video frames (keep latest for fallback capture)
+        // Listen for video frames (for preview and capture)
         frameToken = session.videoFramePublisher.listen { [weak self] frame in
             if let image = frame.makeUIImage() {
                 Task { @MainActor in
-                    self?.latestFrame = image
+                    self?.currentFrame = image
                 }
             }
         }
@@ -116,7 +116,7 @@ class CaptureManager: ObservableObject {
         photoToken = nil
         stateToken = nil
         frameToken = nil
-        latestFrame = nil
+        currentFrame = nil
         isConnected = false
         status = "Ready"
     }
@@ -128,8 +128,8 @@ class CaptureManager: ObservableObject {
             return
         }
         
-        // Use latest video frame directly (more reliable than photo API)
-        if let frame = latestFrame {
+        // Use current video frame directly (more reliable than photo API)
+        if let frame = currentFrame {
             capturedPhoto = frame
             status = "Photo captured!"
         } else {

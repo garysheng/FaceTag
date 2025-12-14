@@ -8,77 +8,73 @@ struct ContentView: View {
     
     @State private var showCaptureSheet = false
     @State private var isRegistered = false
+    @State private var hasCheckedRegistration = false
     
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-            
-            // Icon and status
-            VStack(spacing: 20) {
-                ZStack {
-                    Circle()
-                        .fill(captureManager.isConnected ? Color.green.opacity(0.15) : Color.gray.opacity(0.1))
-                        .frame(width: 160, height: 160)
-                    
-                    Image(systemName: "eyeglasses")
-                        .font(.system(size: 64))
-                        .foregroundStyle(captureManager.isConnected ? .green : .gray)
-                }
-                
+        VStack(spacing: 0) {
+            // Header
+            HStack {
                 Text("FaceTag")
-                    .font(.largeTitle)
+                    .font(.title2)
                     .fontWeight(.bold)
-                
+                Spacer()
                 Text(captureManager.status)
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
             }
+            .padding()
             
-            Spacer()
-            
-            // Instructions when connected
-            if captureManager.isConnected {
-                VStack(spacing: 8) {
-                    Image(systemName: "hand.tap.fill")
-                        .font(.title)
-                        .foregroundStyle(.blue)
-                    Text("Tap Capture Photo below")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            // Video Preview
+            ZStack {
+                Color.black
+                
+                if let frame = captureManager.currentFrame {
+                    Image(uiImage: frame)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } else {
+                    VStack(spacing: 16) {
+                        Image(systemName: "eyeglasses")
+                            .font(.system(size: 50))
+                            .foregroundStyle(.gray.opacity(0.5))
+                        if !captureManager.isConnected {
+                            Text("Tap Start Camera to begin")
+                                .font(.subheadline)
+                                .foregroundStyle(.gray)
+                        }
+                    }
                 }
-                .padding()
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(12)
+                
+                // Live indicator
+                if captureManager.isConnected && captureManager.currentFrame != nil {
+                    VStack {
+                        HStack {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(.green)
+                                    .frame(width: 8, height: 8)
+                                Text("LIVE")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.black.opacity(0.6))
+                            .foregroundColor(.white)
+                            .cornerRadius(6)
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .padding(12)
+                }
             }
-            
-            Spacer()
+            .frame(maxHeight: .infinity)
             
             // Controls
             VStack(spacing: 12) {
-                if !captureManager.isConnected {
-                    Button {
-                        try? Wearables.shared.startRegistration()
-                    } label: {
-                        Label("Connect to Meta View", systemImage: "link")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                    
-                    Button {
-                        Task {
-                            await captureManager.startListening()
-                        }
-                    } label: {
-                        Label("Start Camera", systemImage: "play.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                } else {
-                    // Manual capture button
+                if captureManager.isConnected {
+                    // Capture button
                     Button {
                         captureManager.capturePhoto()
                     } label: {
@@ -93,15 +89,45 @@ struct ContentView: View {
                             await captureManager.stopListening()
                         }
                     } label: {
-                        Label("Disconnect", systemImage: "stop.fill")
+                        Label("Stop Camera", systemImage: "stop.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
+                } else {
+                    // Only show Connect button if not registered
+                    if !isRegistered && hasCheckedRegistration {
+                        Button {
+                            try? Wearables.shared.startRegistration()
+                        } label: {
+                            Label("Connect to Meta View", systemImage: "link")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                    }
+                    
+                    Button {
+                        Task {
+                            await captureManager.startListening()
+                        }
+                    } label: {
+                        Label("Start Camera", systemImage: "play.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                 }
             }
-            .padding(.horizontal)
-            .padding(.bottom, 32)
+            .padding()
+        }
+        .task {
+            // Check if already registered
+            for await devices in Wearables.shared.devicesStream() {
+                isRegistered = !devices.isEmpty
+                hasCheckedRegistration = true
+                break  // Just check once
+            }
         }
         .onOpenURL { url in
             Task {

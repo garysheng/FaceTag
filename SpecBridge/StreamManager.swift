@@ -9,14 +9,11 @@ import MWDATCamera
 @MainActor
 class StreamManager: ObservableObject {
     @Published var currentFrame: UIImage?
-    @Published var status = "Ready to Stream"
+    @Published var status = "Ready"
     @Published var isStreaming = false
     
     private var streamSession: StreamSession?
     private var token: AnyListenerToken?
-    
-    // Reference to web stream manager
-    var webManager: WebStreamManager?
     
     private func configureAudio() {
         let session = AVAudioSession.sharedInstance()
@@ -43,50 +40,45 @@ class StreamManager: ObservableObject {
             }
         }
         
-        status = "Configuring Audio..."
+        status = "Configuring..."
         configureAudio()
         
-        status = "Configuring session..."
         let selector = AutoDeviceSelector(wearables: Wearables.shared)
         
-        // Low resolution is often better for smooth live streaming latency
+        // Medium resolution for better photo quality
         let config = StreamSessionConfig(
             videoCodec: .raw,
-            resolution: .low,
+            resolution: .medium,
             frameRate: 24
         )
         
         let session = StreamSession(streamSessionConfig: config, deviceSelector: selector)
         self.streamSession = session
         
-        // --- VIDEO HANDLING ---
         token = session.videoFramePublisher.listen { [weak self] frame in
-            // 1. Create the visual image for the iPhone screen
             if let image = frame.makeUIImage() {
                 Task { @MainActor in
                     self?.currentFrame = image
-                    self?.status = "Streaming Live"
+                    self?.status = "Connected"
                     self?.isStreaming = true
                 }
             }
-            
-            // 2. Extract the RAW buffer and send to web server
-            let buffer = frame.sampleBuffer
-            self?.webManager?.processVideoFrame(buffer)
         }
         
-        status = "Starting stream..."
+        status = "Connecting..."
         await session.start()
     }
     
     func stopStreaming() async {
         status = "Stopping..."
         await streamSession?.stop()
-        
-        webManager?.stopStreaming()
-        
-        status = "Ready to Stream"
+        status = "Ready"
         isStreaming = false
         currentFrame = nil
+    }
+    
+    /// Capture the current frame as a photo
+    func capturePhoto() -> UIImage? {
+        return currentFrame
     }
 }

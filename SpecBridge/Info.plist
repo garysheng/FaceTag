@@ -11,7 +11,7 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>SpecBridge</string>
+				<string>FaceTag</string>
 			</array>
 		</dict>
 	</array>
@@ -22,21 +22,12 @@
 	<key>MWDAT</key>
 	<dict>
 		<key>AppLinkURLScheme</key>
-		<string>specbridge://</string>
+		<string>facetag://</string>
 		<key>MetaAppID</key>
 		<string>0</string>
 	</dict>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>SpecBridge needs local network access to stream video to your web server.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_http._tcp</string>
-	</array>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
+	<key>NSContactsUsageDescription</key>
+	<string>Save people you meet as contacts with their photo from your glasses.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-peripheral</string>

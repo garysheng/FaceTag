@@ -1,18 +1,23 @@
-# LocalRaybanStream
+# FaceTag
 
-Stream live video from Ray-Ban Meta smart glasses to any web browser.
+Capture faces through your Ray-Ban Meta glasses and save them as contacts.
 
-> **Fork of [SpecBridge](https://github.com/jasondukes/SpecBridge)** by Jason Dukes.  
-> Original streams to Twitch. This version streams to a local web server instead.
+> **Fork of [SpecBridge](https://github.com/jasondukes/SpecBridge)** by Jason Dukes.
 
 ## How It Works
 
 ```
-Ray-Ban Meta Glasses → iPhone App → Node.js Server → Browser
-         (Bluetooth)      (HTTP POST)     (WebSocket)
+See someone → Tap capture → Enter their name → Saved as contact with photo
 ```
 
-The iOS app captures video frames from your glasses and POSTs them as JPEGs to a simple Node.js server. The server broadcasts frames to all connected browsers via WebSocket.
+Use your Ray-Ban Meta glasses as a first-person camera. When you meet someone, tap the capture button to take their photo and save them as a new contact (or add to an existing one).
+
+## Features
+
+- **Live viewfinder** from your glasses camera
+- **One-tap capture** to take a photo
+- **Create new contact** with name and photo
+- **Add to existing contact** to update someone's profile picture
 
 ## Prerequisites
 
@@ -30,72 +35,37 @@ The iOS app captures video frames from your glasses and POSTs them as JPEGs to a
 
 ## Quick Start
 
-### 1. Start the Server
-
-```bash
-cd server
-npm install
-npm start
-```
-
-Note the network IP displayed (e.g., `192.168.1.100`).
-
-### 2. Build the iOS App
+### 1. Build the App
 
 1. Open `SpecBridge.xcodeproj` in Xcode
 2. Select your Apple ID under **Signing & Capabilities**
 3. Connect your iPhone and click **Run**
 
-### 3. Configure and Stream
+### 2. Use the App
 
-1. Tap **Settings** (gear icon) in the app
-2. Enter your server's IP address (from step 1)
-3. Tap **Connect to Glasses** → approve in Meta View app
-4. Tap **Start Stream**
-
-### 4. View in Browser
-
-Open `http://<server-ip>:3000` on any device on your network.
-
-## Server Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `/` | Web viewer with live feed |
-| `/stream.mjpeg` | MJPEG stream (embeddable in `<img>` tags) |
-| `/ws` | WebSocket for real-time frames |
-| `/api/health` | Health check with stats |
+1. Tap **Connect Glasses** → approve in Meta View app
+2. Tap **Start Camera** to see through your glasses
+3. When you see someone, tap the **capture button**
+4. Enter their name and tap **Create New Contact** or **Add to Existing**
 
 ## Project Structure
 
 ```
-LocalRaybanStream/
-├── SpecBridge/                 # iOS app
+FaceTag/
+├── SpecBridge/
 │   ├── SpecBridgeApp.swift     # App entry point
-│   ├── ContentView.swift       # UI
-│   ├── StreamManager.swift     # Glasses connection
-│   └── WebStreamManager.swift  # HTTP frame posting
+│   ├── ContentView.swift       # Main UI + capture flow
+│   ├── StreamManager.swift     # Glasses camera connection
+│   └── ContactManager.swift    # Create/update contacts
 │
-├── server/                     # Node.js server
-│   ├── server.js               # Express + WebSocket
-│   └── public/index.html       # Web viewer
-│
-└── SpecBridge.xcodeproj        # Xcode project
+└── SpecBridge.xcodeproj
 ```
 
-## Performance
+## Permissions
 
-| Metric | Value |
-|--------|-------|
-| Frame Rate | ~15 fps |
-| Latency | 100-300ms (local network) |
-| Bandwidth | ~2-3 Mbps |
-
-## Known Issues
-
-- **Square Crop**: Video is cropped to 1:1 instead of full 9:16 (inherited from original SpecBridge)
-- **No Audio**: Video only; audio streaming would require WebRTC
-- **Local Network Only**: HTTP means no remote streaming without additional setup
+The app requires:
+- **Contacts** - to save captured faces as contacts
+- **Bluetooth** - to connect to your glasses
 
 ## Credits
 

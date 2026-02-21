@@ -10,14 +10,16 @@ import MWDATCore
 
 @main
 struct FaceTagApp: App {
-    
+    @StateObject private var settings = AppSettings()
+
     init() {
         try? Wearables.configure()
     }
-    
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
+                .environmentObject(settings)
         }
     }
 }

@@ -2,28 +2,14 @@ import SwiftUI
 import MWDATCore
 import Contacts
 
-struct ContentView: View {
+struct FaceTagView: View {
     @StateObject private var captureManager = CaptureManager()
     @StateObject private var contactManager = ContactManager()
     
     @State private var showCaptureSheet = false
-    @State private var isRegistered = false
-    @State private var hasCheckedRegistration = false
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text("FaceTag")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
-                Text(captureManager.status)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding()
-            
             // Video Preview
             ZStack {
                 Color.black
@@ -95,20 +81,6 @@ struct ContentView: View {
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                 } else {
-                    // Only show Connect button if not registered
-                    if !isRegistered && hasCheckedRegistration {
-                        Button {
-                            Task {
-                                try? await Wearables.shared.startRegistration()
-                            }
-                        } label: {
-                            Label("Connect to Meta View", systemImage: "link")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                    }
-                    
                     Button {
                         Task {
                             await captureManager.startListening()
@@ -123,20 +95,8 @@ struct ContentView: View {
             }
             .padding()
         }
-        .task {
-            // Check if already registered
-            for await devices in Wearables.shared.devicesStream() {
-                isRegistered = !devices.isEmpty
-                hasCheckedRegistration = true
-                break  // Just check once
-            }
-        }
-        .onOpenURL { url in
-            Task {
-                try? await Wearables.shared.handleUrl(url)
-                isRegistered = true
-            }
-        }
+        .navigationTitle("FaceTag")
+        .navigationBarTitleDisplayMode(.inline)
         .onChange(of: captureManager.capturedPhoto) { _, newPhoto in
             if newPhoto != nil {
                 showCaptureSheet = true
@@ -395,5 +355,7 @@ struct SuccessOverlay: View {
 }
 
 #Preview {
-    ContentView()
+    NavigationStack {
+        FaceTagView()
+    }
 }

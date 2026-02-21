@@ -30,8 +30,23 @@
 		<key>MetaAppID</key>
 		<string>0</string>
 	</dict>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>100.64.40.64</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>NSContactsUsageDescription</key>
 	<string>Save people you meet as contacts with their photo from your glasses.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save recorded videos from your glasses to your Camera Roll.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-peripheral</string>

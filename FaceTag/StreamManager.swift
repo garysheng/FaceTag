@@ -64,7 +64,7 @@ class CaptureManager: ObservableObject {
         self.streamSession = session
         
         // Listen for video frames (for preview and capture)
-        frameToken = session.videoFramePublisher.listen { [weak self] frame in
+        frameToken = session.videoFramePublisher.listen { @Sendable [weak self] frame in
             if let image = frame.makeUIImage() {
                 Task { @MainActor in
                     self?.currentFrame = image
@@ -73,7 +73,7 @@ class CaptureManager: ObservableObject {
         }
         
         // Listen for photos captured via glasses button or capturePhoto()
-        photoToken = session.photoDataPublisher.listen { [weak self] photoData in
+        photoToken = session.photoDataPublisher.listen { @Sendable [weak self] photoData in
             let data = photoData.data
             if let image = UIImage(data: data) {
                 Task { @MainActor in
@@ -84,7 +84,7 @@ class CaptureManager: ObservableObject {
         }
         
         // Listen for state changes
-        stateToken = session.statePublisher.listen { [weak self] state in
+        stateToken = session.statePublisher.listen { @Sendable [weak self] state in
             Task { @MainActor in
                 switch state {
                 case .streaming:

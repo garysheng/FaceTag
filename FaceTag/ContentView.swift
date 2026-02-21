@@ -98,7 +98,9 @@ struct ContentView: View {
                     // Only show Connect button if not registered
                     if !isRegistered && hasCheckedRegistration {
                         Button {
-                            try? Wearables.shared.startRegistration()
+                            Task {
+                                try? await Wearables.shared.startRegistration()
+                            }
                         } label: {
                             Label("Connect to Meta View", systemImage: "link")
                                 .frame(maxWidth: .infinity)

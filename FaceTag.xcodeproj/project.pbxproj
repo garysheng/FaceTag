@@ -406,10 +406,10 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		833554E12EE3A72200387D03 /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/facebook/meta-wearables-dat-ios";
+			repositoryURL = "https://github.com/facebook/meta-wearables-dat-ios.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.1;
+				minimumVersion = 0.4.0;
 			};
 		};
 		833554EC2EE3B87000387D03 /* XCRemoteSwiftPackageReference "HaishinKit" */ = {
